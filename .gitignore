@@ -3,3 +3,5 @@ data/
 .mypy_cache
 .vscode
 *.pkl
+*.txt
+*.csv
