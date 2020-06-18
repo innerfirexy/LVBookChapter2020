@@ -7,18 +7,7 @@ from collections import Counter
 from typing import (List)
 from tqdm import tqdm
 
-
-def list_all_files() -> List[str]:
-    all_files: List[str] = []
-    data_dir = './data/Wikisource_chn'
-
-    for path in os.listdir(data_dir):
-        full_path = os.path.join(data_dir, path)
-        for file in os.listdir(full_path):
-            all_files.append(os.path.join(full_path, file))
-    assert all(f.endswith('.txt') for f in all_files)
-
-    return all_files
+from preprocess import list_all_files
 
 
 def get_puncts_single_file(fname: str):
@@ -47,7 +36,7 @@ def get_all_puncts():
         return set(all_puncts)
     
     punctuations: List[str] = []
-    all_files = list_all_files()
+    all_files = list_all_files(data_dir='./data/Wikisource_chn')
     for fn in tqdm(all_files, ncols=100):
         puncts = get_puncts_single_file(fn)
         punctuations.append(puncts)
@@ -61,7 +50,7 @@ def get_all_puncts():
 
 
 def char_count_by_year():
-    all_files = list_all_files()
+    all_files = list_all_files(data_dir='./data/Wikisource_chn')
     all_puncts = get_all_puncts()
     results = Counter()
 

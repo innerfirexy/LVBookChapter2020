@@ -47,6 +47,7 @@ def get_mean_char_norms(word_vectors: Dict[str, np.ndarray], char_vectors: Dict[
 
 
 def get_norm_ratios(word_vectors: Dict[str, np.ndarray], char_vectors: Dict[str, np.ndarray]) -> Dict[str, np.float]:
+    # TODO:
     
     pass
 
