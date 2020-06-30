@@ -11,7 +11,6 @@ import jieba
 
 def list_all_files(data_dir: str) -> List[str]:
     all_files: List[str] = []
-    # data_dir = './data/Wikisource_chn'
 
     for path in os.listdir(data_dir):
         full_path = os.path.join(data_dir, path)
@@ -20,6 +19,30 @@ def list_all_files(data_dir: str) -> List[str]:
     assert all(f.endswith('.txt') for f in all_files)
 
     return all_files
+
+
+def line_to_sentences(input_str: str) -> List[str]:
+    pass
+
+def convert_to_sentences():
+    """
+    Segment each line of text with end-of-sentence characters, '。', '！', '？'
+    Save to new files, with each sentence as a line.
+    """
+    data_dir = './data/Wikisource_chn'
+    all_files = list_all_files(data_dir)
+
+    for fname in tqdm(all_files):
+        sentences = []
+        with open(fname, 'r') as f:
+            for line in f.readline():
+                sents = line_to_sentences(line.rstrip())
+                sentences.append(sents)
+        
+        sentences = itertools.chain.from_iterable(sentences)
+        fname_new = None
+        with open(fname_new, 'w') as f:
+            pass
 
 
 def seg_jieba():
