@@ -22,7 +22,14 @@ def list_all_files(data_dir: str) -> List[str]:
 
 
 def line_to_sentences(input_str: str) -> List[str]:
+    """
+    Example:
+        input: 故尚書兵部員外郎、知制誥、知鄧州軍州事陽夏公之夫人，姓高氏，宣州宣城人也。
+        output: 故尚書兵部員外郎知制誥知鄧州軍州事陽夏公之夫人姓高氏宣州宣城人也
+    """
+    
     pass
+
 
 def convert_to_sentences():
     """

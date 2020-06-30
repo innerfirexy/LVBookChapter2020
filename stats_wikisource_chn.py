@@ -76,7 +76,11 @@ def char_count_by_year():
 
 
 def main():
-    char_count_by_year()
+    # char_count_by_year()
+    all_puncts = get_all_puncts()
+    with open('all_puncts.txt', 'w') as f:
+        for p in all_puncts:
+            f.write(f'{p}\n')
 
 
 if __name__ == "__main__":
