@@ -47,9 +47,14 @@ def get_mean_char_norms(word_vectors: Dict[str, np.ndarray], char_vectors: Dict[
 
 
 def get_norm_ratios(word_vectors: Dict[str, np.ndarray], char_vectors: Dict[str, np.ndarray]) -> Dict[str, np.float]:
-    # TODO:
-    
-    pass
+    mean_char_norms = get_mean_char_norms(word_vectors, char_vectors)
+
+    norm_ratios: Dict[str, np.ndarray] = {}
+    for word, vec in word_vectors.items():
+        mean_word = np.mean(vec)
+        norm_ratios[word] = mean_word / mean_char_norms[word]
+
+    return norm_ratios
 
 
 def words_by_length(vectors: Dict[str, np.ndarray]) -> \
@@ -67,3 +72,11 @@ def words_by_length(vectors: Dict[str, np.ndarray]) -> \
             wv_4char[w] = v
     
     return wv_2char, wv_3char, wv_4char
+
+
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    main()

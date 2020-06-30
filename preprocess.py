@@ -6,6 +6,8 @@ from collections import Counter
 from typing import (List)
 from tqdm import tqdm
 
+import jieba
+
 
 def list_all_files(data_dir: str) -> List[str]:
     all_files: List[str] = []
@@ -20,3 +22,11 @@ def list_all_files(data_dir: str) -> List[str]:
     return all_files
 
 
+def seg_jieba():
+    jieba.enable_parallel(4)
+
+    data_dir = ''
+    all_files = list_all_files(data_dir)
+
+
+    pass
