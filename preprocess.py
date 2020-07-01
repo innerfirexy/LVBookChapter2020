@@ -21,14 +21,35 @@ def list_all_files(data_dir: str) -> List[str]:
     return all_files
 
 
-def line_to_sentences(input_str: str) -> List[str]:
+def line_to_sentences(input_str: str, separators: List[str] = ['', '', '']) -> List[str]:
     """
     Example:
-        input: 故尚書兵部員外郎、知制誥、知鄧州軍州事陽夏公之夫人，姓高氏，宣州宣城人也。
-        output: 故尚書兵部員外郎知制誥知鄧州軍州事陽夏公之夫人姓高氏宣州宣城人也
+        input_str: 故尚書兵部員外郎、知制誥、知鄧州軍州事陽夏公之夫人，姓高氏，宣州宣城人也。父諱惠連，官至兵部郎中。母曰廣陵縣君勾氏。
+        output: ['故尚書兵部員外郎、知制誥、知鄧州軍州事陽夏公之夫人，姓高氏，宣州宣城人也。', \
+            '父諱惠連，官至兵部郎中。', '母曰廣陵縣君勾氏。']
     """
-    
-    pass
+    pattern = f'({"|".join(separators)})'
+    segments = re.split(pattern, input_str)
+
+    # segments looks like: ['姓高氏，宣州宣城人也', '。', '父諱惠連，官至兵部郎中', '。', '母曰廣陵縣君勾氏', '。', '']
+    if len(segments) > 1:
+        sentences: List[str] = []
+    else:
+        sentences = segments
+
+    i = 1
+    while i < len(segments):
+        if segments[i] in separators:
+            sent = segments[i-1] + segments[i]
+            sentences.append(sent)
+            i += 2
+
+    return sentences
+
+
+def remove_puncts(input_sentence: str, puncts: List[str]) -> str:
+    cleaned = ''.join([ch for ch in input_sentence if ch not in puncts])
+    return cleaned
 
 
 def convert_to_sentences():

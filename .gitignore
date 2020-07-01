@@ -2,6 +2,7 @@ vectors/
 data/
 .mypy_cache
 .vscode
+*.pyc
 *.pkl
 *.txt
 *.csv
