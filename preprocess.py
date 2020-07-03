@@ -5,30 +5,46 @@ import pandas as pd
 from collections import Counter
 from typing import (List)
 from tqdm import tqdm
+import glob
 
 import jieba
 
 
-def list_all_files(data_dir: str) -> List[str]:
+def list_all_files(data_dir: str, file_ext: str = '.txt') -> List[str]:
+    all_files: List[str] = []
+
+    for path in os.listdir(data_dir):
+        full_path = os.path.join(data_dir, path)
+        file_pattern = f'{path}_*' + file_ext
+        txt_files = glob.glob(os.path.join(full_path, file_pattern))
+        for file in txt_files:
+            all_files.append(file)
+    # assert all(f.endswith('.txt') for f in all_files)
+
+    return all_files
+
+
+def list_all_files_old(data_dir: str) -> List[str]:
     all_files: List[str] = []
 
     for path in os.listdir(data_dir):
         full_path = os.path.join(data_dir, path)
         for file in os.listdir(full_path):
             all_files.append(os.path.join(full_path, file))
-    assert all(f.endswith('.txt') for f in all_files)
+    # assert all(f.endswith('.txt') for f in all_files)
 
     return all_files
 
 
-def line_to_sentences(input_str: str, separators: List[str] = ['', '', '']) -> List[str]:
+
+def line_to_sentences(input_str: str, separators: List[str] = ['。', '？', '！']) -> List[str]:
     """
     Example:
         input_str: 故尚書兵部員外郎、知制誥、知鄧州軍州事陽夏公之夫人，姓高氏，宣州宣城人也。父諱惠連，官至兵部郎中。母曰廣陵縣君勾氏。
         output: ['故尚書兵部員外郎、知制誥、知鄧州軍州事陽夏公之夫人，姓高氏，宣州宣城人也。', \
             '父諱惠連，官至兵部郎中。', '母曰廣陵縣君勾氏。']
     """
-    pattern = f'({"|".join(separators)})'
+    pattern = '(' + '|'.join(separators) + ')'
     segments = re.split(pattern, input_str)
 
     # segments looks like: ['姓高氏，宣州宣城人也', '。', '父諱惠連，官至兵部郎中', '。', '母曰廣陵縣君勾氏', '。', '']
@@ -47,11 +63,6 @@ def line_to_sentences(input_str: str, separators: List[str] = ['', '', '']) -> L
     return sentences
 
 
-def remove_puncts(input_sentence: str, puncts: List[str]) -> str:
-    cleaned = ''.join([ch for ch in input_sentence if ch not in puncts])
-    return cleaned
-
-
 def convert_to_sentences():
     """
     Segment each line of text with end-of-sentence characters, '。', '！', '？'
@@ -60,24 +71,57 @@ def convert_to_sentences():
     data_dir = './data/Wikisource_chn'
     all_files = list_all_files(data_dir)
 
-    for fname in tqdm(all_files):
-        sentences = []
+    for fname in tqdm(all_files, ncols=100):
         with open(fname, 'r') as f:
-            for line in f.readline():
-                sents = line_to_sentences(line.rstrip())
-                sentences.append(sents)
+            line = f.read() # using readline() will result in a problem
+            sentences = line_to_sentences(line.strip(), separators=['。', '！', '？']) # 
         
-        sentences = itertools.chain.from_iterable(sentences)
-        fname_new = None
+        fname_new = fname + '.sentences'
         with open(fname_new, 'w') as f:
-            pass
+            for sent in sentences:
+                sent = sent.replace(' ', '')
+                f.write(sent + '\n')
 
 
-def seg_jieba():
+def remove_puncts():
+    """
+    Remove all punctuations in a sentence
+    """
+    data_dir = './data/Wikisource_chn'
+    all_files = list_all_files(data_dir, file_ext='.sentences')
+
+    # read punctuation vocabulary
+    puncts = []
+    with open('all_puncts.txt', 'r') as f:
+        for line in f:
+            puncts.append(line[:-1])
+    puncts = set(''.join(puncts))
+
+    for fname in tqdm(all_files, ncols=100):
+        cleaned_sentences = []
+        with open(fname, 'r') as f:
+            for line in f:
+                line = line.strip()
+                cleaned = ''.join([ch for ch in line if ch not in puncts])
+                cleaned_sentences.append(cleaned)
+
+        fname_new = fname + '.nopuncts'
+        with open(fname_new, 'w') as f:
+            for sent in cleaned_sentences:
+                f.write(sent + '\n')
+
+
+def word_segment_jieba():
     jieba.enable_parallel(4)
 
     data_dir = ''
     all_files = list_all_files(data_dir)
 
 
-    pass
+def main():
+    # convert_to_sentences()
+    remove_puncts()
+
+
+if __name__ == "__main__":
+    main()
