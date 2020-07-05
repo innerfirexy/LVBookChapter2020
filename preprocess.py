@@ -114,13 +114,27 @@ def remove_puncts():
 def word_segment_jieba():
     jieba.enable_parallel(4)
 
-    data_dir = ''
-    all_files = list_all_files(data_dir)
+    data_dir = './data/Wikisource_chn'
+    all_files = list_all_files(data_dir, file_ext='.sentences.nopuncts')
+
+    for fname in tqdm(all_files, ncols=100):
+        segment_results = []
+        with open(fname, 'r') as f:
+            for line in f:
+                line = line.strip()
+                seg = jieba.cut(line, cut_all=False)
+                segment_results.append(seg)
+        
+        fname_new = fname + '.jieba'
+        with open(fname_new, 'w') as f:
+            for seg in segment_results:
+                f.write(' '.join(seg) + '\n')
 
 
 def main():
     # convert_to_sentences()
-    remove_puncts()
+    # remove_puncts()
+    word_segment_jieba()
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import glob
 import os
 import re
 import itertools
+import pickle
 import pandas as pd
 from collections import Counter
 from typing import (List)
@@ -64,7 +65,7 @@ def char_count_by_year():
         year = m.group()
         count = 0
         with open(fname, 'r') as f:
-            text = f.read().rstrip()
+            text = f.read().strip()
             for ch in text:
                 if ch not in all_puncts:
                     count += 1
@@ -75,12 +76,52 @@ def char_count_by_year():
     df.to_csv('wikisource_chn_cc_year.csv', header=['year', 'charCount'], index=False)
 
 
+def word_count_by_year():
+    all_files = list_all_files(data_dir='./data/Wikisource_chn',\
+        file_ext='.nopuncts.jieba') 
+    counter = Counter()
+    vocab_per_year = {}
+
+    for fname in tqdm(all_files, ncols=100):
+        base_name = os.path.basename(fname)
+        m = re.match(r'^\d+(?=_)', base_name)
+        if m is None:
+            print(fname)
+            raise FileNotFoundError
+        year = m.group()
+        
+        if year not in vocab_per_year:
+            vocab_per_year[year] = Counter()
+
+        with open(fname, 'r') as f:
+            tmp_count = 0
+            for line in f:
+                words = line.strip().split()
+                tmp_count += len(words)
+                for w in words:
+                    vocab_per_year[year][w] += 1
+            counter[year] += tmp_count
+        
+    word_count_records = list(counter.items())
+    df = pd.DataFrame.from_records(word_count_records)
+    df.to_csv('wikisource_chn_word_count_year.csv', header=['year', 'wordCount'], index=False)
+
+    vocab_records = [(key, len(val)) for key, val in vocab_per_year.items()]
+    df2 = pd.DataFrame.from_records(vocab_records)
+    df2.to_csv('wikisource_chn_vocab_size_year.csv', header=['year', 'vocabSize'], index=False)
+        
+    pickle.dump(vocab_per_year, open('chn_vocab_per_year.pkl', 'wb'))
+
+
 def main():
     # char_count_by_year()
-    all_puncts = get_all_puncts()
-    with open('all_puncts.txt', 'w') as f:
-        for p in all_puncts:
-            f.write(f'{p}\n')
+
+    # all_puncts = get_all_puncts()
+    # with open('all_puncts.txt', 'w') as f:
+    #     for p in all_puncts:
+    #         f.write(f'{p}\n')
+    
+    word_count_by_year()
 
 
 if __name__ == "__main__":
