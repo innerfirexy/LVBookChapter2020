@@ -1,0 +1,158 @@
+q()
+734000*0.2
+install.packages('tidyverse')
+library(ggplot2)
+x = seq(0.001, 1, 0.01)
+len(x)
+dim(x)
+length(x)
+y=-log(x)
+y=-log(-x)
+y=-log(x)
+length(y)
+install.packages('data.table')
+d = data.table(x=x,y=y)
+library(data.table)
+d = data.table(x=x,y=y)
+d
+p = ggplot(d, aes(x=x, y=y))
+p
+p = ggplot(d, aes(x=x, y=y)) + geom_point()
+p
+p = ggplot(d, aes(x=x, y=y)) + geom_line()
+p
+p = ggplot(d, aes(x=x, y=y)) + geom_line(linewidth=0.5)
+p = ggplot(d, aes(x=x, y=y)) + geom_line(width=0.5)
+p = ggplot(d, aes(x=x, y=y)) + geom_line(size=0.5)
+p
+p = ggplot(d, aes(x=x, y=y)) + geom_line(size=0.5) + labs(y='-log(x)')
+p
+p = ggplot(d, aes(x=x, y=y)) + geom_line(size=0.5) + labs(y='-log(x)') + theme_bw()
+p
+p = ggplot(d, aes(x=x, y=y)) + geom_line(size=0.5) + labs(y='-log(y_hat)', x='y_hat') + theme_bw()
+p
+734000*0.2
+734000*0.2-20000
+734*0.8
+126.8-9.1
+146.8-20
+126.8-9.1
+ls()
+x1 = seq(0, 0.999, 0.01)
+length(x1)
+y1 = -log(1-x1)
+d1 = data.table(x=x1, y=y1)
+p1 = ggplot(d1, aes(x=x,y=y)) + geom_line(size=0.5) + labs(y='-log(1 - y_hat)', x='y_hat') + theme_bw()
+p1
+23/26
+12/14
+12/13
+ls()
+unigram = fread('~/academic_projects/zhwiki/googlengram/1gram_earliest_year.txt')
+unigram
+min(unigram$V2)
+summary(unigram$V2)
+unique(unigram$V1)
+length(unique(unigram$V1))
+q()
+7*7*512
+92000/12
+q()
+623.45/6
+10223*0.26
+9118-8852
+266/8852
+30668*0.26
+q()
+d_pso = readRDS('~/academic_projects/acl2017/data/dt.pso.rds')
+d_pso
+?log
+log(3, base=4)
+740*0.8
+15100
+3300
+4
+1800*0.2
+q()
+log(4, base=3)
+q()
+8*12.95
+23400+12480+35000+9000
+q()
+1000*5
+5000*4
+5000*4 * 0.006
+q()
+8133*3
+8133*3*1.25
+32532/3
+32532/4
+8133*4
+97596/8133
+97596/3
+q()
+install.packages("languageserver")
+q()
+require("lme4")
+q()
+require(devtools)
+require(devtool)
+require(data.table)
+install.packages("data.table")
+install.packages("ggplot2")
+install.packages("tidyverse")
+ls()
+library("devtools")
+install.packages("devtools")
+library("devtools")
+install_github("lme4/lme4",dependencies=TRUE)
+require(lme4)
+install.packages(lmerTest)
+install.packages("lmerTest")
+require(lmerTest)
+q()
+install.packages("languageserver")
+q()
+5000,000
+5000 * 10000 * 1000
+5000 * 10000 * 1000 / (13 * 100000000)
+q()
+setwd("/Users/xy/academic_projects/LVBookChapter2020")
+require(ggplot2)#
+require(data.table)#
+require(dplyr)#
+### Read data#
+# word count per year#
+d.wcount = fread("wikisource_chn_word_count_year.csv")#
+#
+# char count per year#
+d.ccount = fread("wikisource_chn_cc_year.csv")#
+#
+# vocab size per year#
+d.vsize = fread("wikisource_chn_vocab_size_year.csv")#
+#
+# combine#
+d.comb = cbind(d.wcount, d.ccount$charCount, d.vsize$vocabSize) %>%#
+    rename(charCount = V2, vocabSize = V3)#
+d.combm = melt(d.comb, id.vars = "year", variable.name = "Statistics")#
+# deal with outliers#
+mean.wcount = mean(d.wcount$wordCount)#
+sd.wcount = sd(d.wcount$wordCount)#
+#
+mean.ccount = mean(d.ccount$charCount)#
+sd.ccount = sd(d.ccount$charCount)#
+#
+mean.vsize = mean(d.vsize$vocabSize)#
+sd.vsize = sd(d.vsize$vocabSize)#
+#
+d.comb.clean  = d.comb %>%#
+    filter(between(wordCount, mean.wcount - 2*sd.wcount, mean.wcount + 2*sd.wcount)) %>%#
+    filter(between(charCount, mean.ccount - 2*sd.ccount, mean.ccount + 2*sd.ccount)) %>%#
+    filter(between(vocabSize, mean.vsize - 2*sd.vsize, mean.vsize + 2*sd.vsize))#
+d.comb.clean = data.table(d.comb.clean)#
+d.combm.clean = melt(d.comb.clean, id.vars = "year", variable.name = "Statistics")
+require(ggpattern)#
+p.col.pattern = ggplot(d.combm.clean[year %in% seq(1040, 1950, 10)], aes(x=year, y=value)) + #
+    geom_col_pattern(pattern = "magick", aes(pattern_fill=Statistics)) + #
+    theme_bw()
+p.col.pattern

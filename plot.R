@@ -47,5 +47,15 @@ p.jitter = ggplot(d.combm.clean[year<=1950], aes(x=year, y=value)) +
     geom_smooth(aes(color=Statistics, linetype=Statistics))
 
 p.smooth = ggplot(d.combm.clean[year<=1950], aes(x=year, y=value)) + 
-    geom_jitter(aes(color=Statistics, shape=Statistics)) + 
     geom_smooth(aes(color=Statistics, linetype=Statistics))
+
+
+p.col = ggplot(d.combm.clean[year %in% seq(1040, 1950, 10)], aes(x=year, y=value)) + 
+    geom_col(aes(fill=Statistics), position="stack") +
+    theme_bw()
+
+require(ggpattern)
+p.col.pattern = ggplot(d.combm.clean[year %in% seq(1040, 1950, 10)], aes(x=year, y=value)) + 
+    geom_col_pattern(pattern = "magick", aes(pattern_fill=Statistics)) + 
+    theme_bw()
+# Does not work
