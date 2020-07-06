@@ -131,10 +131,64 @@ def word_segment_jieba():
                 f.write(' '.join(seg) + '\n')
 
 
+def group_year_span(span: int = 100):
+    """
+    span: number of years as the span
+    """
+    df_wcount = pd.read_csv('wikisource_chn_word_count_year.csv')
+
+    start_year = df_wcount['year'].min()
+    end_year = df_wcount['year'].max()
+    boundaries = list(range(start_year, end_year, span))
+    # use 1951 as a cut-off
+    cut_off = 1951
+    boundaries = [year for year in boundaries if abs(year - cut_off) > 50] + [cut_off]
+
+    data_dir = './data/Wikisource_chn'
+    all_years = sorted(map(int, os.listdir(data_dir)))
+
+    # create output folders
+    output_dir = './data/group_year_span'
+    if not os.path.exists(output_dir) or os.path.isfile(output_dir):
+        os.mkdir(output_dir)
+    
+    parent_folder = f'{span}years_cutoff{cut_off}'
+    parent_dir = os.path.join(output_dir, parent_folder)
+    if not os.path.exists(parent_dir):
+        os.mkdir(parent_dir)
+
+    for i in range(len(boundaries)-1):
+        group_dir = os.path.join(parent_dir, 'group'+str(i+1))
+        if not os.path.exists(group_dir):
+            os.mkdir(group_dir)
+        # obtain the years in group i from `all_years`
+        start = boundaries[i]
+        end = boundaries[i+1]
+        target_years = [y for y in all_years if y >= start and y < end]
+        with open(os.path.join(group_dir, 'years.txt'), 'w') as f:
+            for y in target_years:
+                f.write(str(y) + '\n')
+        
+        # obtain the segmented text files in group i
+        text_files: List[str] = []
+        for year in target_years:
+            year_data_dir = os.path.join(data_dir, str(year))
+            for file in glob.glob(os.path.join(year_data_dir, f'{year}_*.jieba')):
+                text_files.append(file)
+        with open(os.path.join(group_dir, 'text_files.txt'), 'w') as f:
+            for file in text_files:
+                f.write(file + '\n')
+        
+        # write data
+
+    pass
+
+
 def main():
     # convert_to_sentences()
     # remove_puncts()
-    word_segment_jieba()
+    # word_segment_jieba()
+    group_year_span(span=100)
 
 
 if __name__ == "__main__":
