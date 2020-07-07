@@ -131,6 +131,39 @@ def word_segment_jieba():
                 f.write(' '.join(seg) + '\n')
 
 
+def merge_rows():
+    """
+    """
+    data_dir = './data/Wikisource_chn'
+    all_files = list_all_files(data_dir, file_ext='.sentences.nopuncts.jieba')
+
+    for fname in tqdm(all_files, ncols=100):
+        merged: List[str] = []
+        with open(fname, 'r') as f:
+            lines = [line.strip() for line in f]
+            lengths = [len(line.split()) for line in lines]
+
+            min_len = 10
+            i = 0
+            sub_str = ''
+            sub_len = 0
+            while i < len(lengths):
+                sub_str = ' '.join([sub_str, lines[i]])
+                sub_len += lengths[i]
+                if sub_len >= min_len:
+                    merged.append(sub_str.strip())
+                    sub_str = ''
+                    sub_len = 0
+                i += 1
+            if sub_len > 0:
+                merged[-1] = ' '.join([merged[-1], sub_str])
+            
+        # write merged lines to new file
+        fname_new = fname + '.merged'
+        with open(fname_new, 'w') as f:
+            pass
+
+
 def group_year_span(span: int = 100):
     """
     span: number of years as the span
@@ -180,8 +213,11 @@ def group_year_span(span: int = 100):
                 f.write(file + '\n')
         
         # write data
-
-    pass
+        print(f'writing data for group {i}')
+        with open(os.path.join(group_dir, 'data.txt'), 'w') as fout:
+            for file in tqdm(text_files, ncols=100):
+                with open(file, 'r') as fin:
+                    fout.write(fin.read())
 
 
 def main():
