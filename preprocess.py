@@ -5,8 +5,9 @@ import pandas as pd
 from collections import Counter
 from typing import (List)
 from tqdm import tqdm
+import subprocess
+import platform
 import glob
-
 import jieba
 
 
@@ -161,10 +162,11 @@ def merge_rows():
         # write merged lines to new file
         fname_new = fname + '.merged'
         with open(fname_new, 'w') as f:
-            pass
+            for line in merged:
+                f.write(line + '\n')
 
 
-def group_year_span(span: int = 100):
+def group_year_span(span: int = 100, file_type: str = '.jieba'):
     """
     span: number of years as the span
     """
@@ -194,6 +196,7 @@ def group_year_span(span: int = 100):
         group_dir = os.path.join(parent_dir, 'group'+str(i+1))
         if not os.path.exists(group_dir):
             os.mkdir(group_dir)
+
         # obtain the years in group i from `all_years`
         start = boundaries[i]
         end = boundaries[i+1]
@@ -206,7 +209,7 @@ def group_year_span(span: int = 100):
         text_files: List[str] = []
         for year in target_years:
             year_data_dir = os.path.join(data_dir, str(year))
-            for file in glob.glob(os.path.join(year_data_dir, f'{year}_*.jieba')):
+            for file in glob.glob(os.path.join(year_data_dir, f'{year}_*' + file_type)):
                 text_files.append(file)
         with open(os.path.join(group_dir, 'text_files.txt'), 'w') as f:
             for file in text_files:
@@ -218,13 +221,27 @@ def group_year_span(span: int = 100):
             for file in tqdm(text_files, ncols=100):
                 with open(file, 'r') as fin:
                     fout.write(fin.read())
+        
+        # shuffle data
+        in_file = os.path.join(group_dir, 'data.txt')
+        out_file = os.path.join(group_dir, 'data_shuf.txt')
+        print(f'shuffling {in_file} to {out_file}')
+        if platform.platform().startswith('Darwin'):
+            cmd = f'cat {in_file} | gshuf > {out_file}'
+            subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        elif platform.platform().startswith('Linux'):
+            cmd = f'cat {in_file} | shuf > {out_file}'
+            subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 
 
 def main():
     # convert_to_sentences()
     # remove_puncts()
     # word_segment_jieba()
-    group_year_span(span=100)
+    # merge_rows()
+
+    # group_year_span(span=100)
+    group_year_span(span=100, file_type='.jieba.merged')
 
 
 if __name__ == "__main__":
