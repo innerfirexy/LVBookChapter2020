@@ -3,10 +3,11 @@ from tqdm import tqdm
 from typing import (Dict, Any, Tuple, List)
 
 
-def emb2dict(emb_file: str, vec_start_idx: int = 2, normalize: bool = False) -> Dict[str, np.ndarray]:
+def read_embeddings(emb_file: str, 
+    vec_start_idx: int = 2, 
+    normalize: bool = False) -> Dict[str, np.ndarray]:
     """
-    return: a dict object containing word embeddings
-    This function is slower than data_producer.emb2dict
+    return: a dict object containing word/character embeddings
     """
     vectors: Dict[str, np.ndarray] = {}
     with open(emb_file, 'r') as f:
@@ -30,7 +31,31 @@ def emb2dict(emb_file: str, vec_start_idx: int = 2, normalize: bool = False) -> 
     return vectors
 
 
-def get_mean_char_norms(word_vectors: Dict[str, np.ndarray], char_vectors: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+def filter_by_length(word_vectors: Dict[str, np.ndarray], len_to_keep: int) \
+    -> Dict[str, np.ndarray]:
+    filtered = {key: val for key, val in word_vectors.items() if len(key) == len_to_keep}
+    return filtered
+
+
+def get_all_char_norms(word_vectors: Dict[str, np.ndarray], 
+    char_vectors: Dict[str, np.ndarray]) -> List[Tuple[Any]]:
+    """
+    Args:
+        word_vectors is the result from filter_by_length, i.e., all words have same length
+    Return:
+        A list of records, e.g., [(宰相, char1_norm, char2_norm), ...]
+        or, [(光禄勋, char1_norm, char2_norm, char3_norm), ...]
+    """
+    
+    pass
+
+
+def get_mean_char_norms(word_vectors: Dict[str, np.ndarray], 
+    char_vectors: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+    """
+    Return:
+        {word -> mean_char_norm}
+    """
     mean_char_norms: Dict[str, np.ndarray] = {}
     for word in word_vectors.keys():
         ch_norms: List[Any] = []
@@ -74,7 +99,20 @@ def words_by_length(vectors: Dict[str, np.ndarray]) -> \
     return wv_2char, wv_3char, wv_4char
 
 
+def experiment1_chn():
+    results_dir = './data/group_year_span/100years_cutoff1951'
+
+    ## cbow = 1, cwe_type = 1 (CWE)
+    word_emb_file = 'wordvec_cbow1_size300_cwetype1.txt'
+    char_emb_file = 'charvec_cbow1_size300_cwetype1.txt'
+
+
+
+    pass
+
+
 def main():
+
     pass
 
 
