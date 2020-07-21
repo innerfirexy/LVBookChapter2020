@@ -37,8 +37,12 @@ def filter_by_length(word_vectors: Dict[str, np.ndarray], len_to_keep: int) \
     return filtered
 
 
-def get_all_char_norms(word_vectors: Dict[str, np.ndarray], 
-    char_vectors: Dict[str, np.ndarray]) -> List[Tuple[Any]]:
+def compute_word_norms(word_vectors: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+    pass
+
+
+def compute_all_chars_norms(word_vectors: Dict[str, np.ndarray], 
+    char_vectors: Dict[str, np.ndarray]) -> List[Tuple]:
     """
     Args:
         word_vectors is the result from filter_by_length, i.e., all words have same length
@@ -46,11 +50,18 @@ def get_all_char_norms(word_vectors: Dict[str, np.ndarray],
         A list of records, e.g., [(宰相, char1_norm, char2_norm), ...]
         or, [(光禄勋, char1_norm, char2_norm, char3_norm), ...]
     """
+    result: List[Tuple] = []
+
+    for word in word_vectors.keys():
+        item = [word]
+        for ch in word:
+            item.append(np.linalg.norm(char_vectors[ch]))
+        result.append(tuple(item))
     
-    pass
+    return result
 
 
-def get_mean_char_norms(word_vectors: Dict[str, np.ndarray], 
+def compute_mean_char_norms(word_vectors: Dict[str, np.ndarray], 
     char_vectors: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
     """
     Return:
@@ -71,8 +82,8 @@ def get_mean_char_norms(word_vectors: Dict[str, np.ndarray],
     return mean_char_norms
 
 
-def get_norm_ratios(word_vectors: Dict[str, np.ndarray], char_vectors: Dict[str, np.ndarray]) -> Dict[str, np.float]:
-    mean_char_norms = get_mean_char_norms(word_vectors, char_vectors)
+def compute_norm_ratios(word_vectors: Dict[str, np.ndarray], char_vectors: Dict[str, np.ndarray]) -> Dict[str, np.float]:
+    mean_char_norms = compute_mean_char_norms(word_vectors, char_vectors)
 
     norm_ratios: Dict[str, np.ndarray] = {}
     for word, vec in word_vectors.items():
