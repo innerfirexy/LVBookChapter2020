@@ -1,4 +1,7 @@
+import os
+import glob
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 from typing import (Dict, Any, Tuple, List)
 
@@ -37,8 +40,14 @@ def filter_by_length(word_vectors: Dict[str, np.ndarray], len_to_keep: int) \
     return filtered
 
 
-def compute_word_norms(word_vectors: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
-    pass
+def compute_word_norms(word_vectors: Dict[str, np.ndarray]) -> List[Tuple]:
+    result: List[Tuple] = []
+
+    for word in word_vectors.keys():
+        item = (word, np.linalg.norm(word_vectors[word]))
+        result.append(item)
+    
+    return result
 
 
 def compute_all_chars_norms(word_vectors: Dict[str, np.ndarray], 
@@ -117,14 +126,32 @@ def experiment1_chn():
     word_emb_file = 'wordvec_cbow1_size300_cwetype1.txt'
     char_emb_file = 'charvec_cbow1_size300_cwetype1.txt'
 
+    for group_folder in glob.glob(os.path.join(results_dir, 'group*')):
+        word_full_path = os.path.join(group_folder, word_emb_file)
+        char_full_path = os.path.join(group_folder, char_emb_file)
+        word_vectors = read_embeddings(emb_file = word_full_path)
+        char_vectors = read_embeddings(emb_file = char_full_path)
 
+        word_base_name = os.path.splitext(word_full_path)[0]
+        char_base_name = os.path.splitext(char_full_path)[0]
+        
+        # Compute word norms
+        print(f'computing word norms for {group_folder}')
+        res_word = compute_word_norms(word_vectors = word_vectors)
+        res_word_df = pd.DataFrame(res_word)
+        res_word_df.to_csv(word_base_name + '_wordnorms.csv', header=['word', 'norm'], index=False)
 
-    pass
+        # Compute char norms for word_len = 1, 2, 3, 4
+        word_vectors_len1 = filter_by_length(word_vectors, len_to_keep=1)
+        res_len1 = compute_all_chars_norms(word_vectors_len1, char_vectors)
+        res_len1_df = pd.DataFrame(res_len1)
+        
+        
+
 
 
 def main():
-
-    pass
+    experiment1_chn()
 
 
 if __name__ == "__main__":
