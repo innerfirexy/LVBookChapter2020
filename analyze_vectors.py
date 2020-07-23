@@ -8,7 +8,8 @@ from typing import (Dict, Any, Tuple, List)
 
 def read_embeddings(emb_file: str, 
     vec_start_idx: int = 2, 
-    normalize: bool = False) -> Dict[str, np.ndarray]:
+    normalize: bool = False,
+    skip_eos: bool = True) -> Dict[str, np.ndarray]:
     """
     return: a dict object containing word/character embeddings
     """
@@ -16,6 +17,8 @@ def read_embeddings(emb_file: str,
     with open(emb_file, 'r') as f:
         header = f.readline()
         num, size = tuple(map(int, header.split()))
+        if skip_eos: 
+            f.readline() # skip line 2: </s>
         for line in tqdm(f, ncols=100, total=num):
             items = line.rstrip().split()
             token = items[0]
@@ -127,10 +130,11 @@ def experiment1_chn():
     char_emb_file = 'charvec_cbow1_size300_cwetype1.txt'
 
     for group_folder in glob.glob(os.path.join(results_dir, 'group*')):
+        print(f'reading embeddings for {group_folder}')
         word_full_path = os.path.join(group_folder, word_emb_file)
         char_full_path = os.path.join(group_folder, char_emb_file)
         word_vectors = read_embeddings(emb_file = word_full_path)
-        char_vectors = read_embeddings(emb_file = char_full_path)
+        char_vectors = read_embeddings(emb_file = char_full_path, skip_eos=False) # character embedding file does not contain '</s>'
 
         word_base_name = os.path.splitext(word_full_path)[0]
         char_base_name = os.path.splitext(char_full_path)[0]
@@ -142,12 +146,12 @@ def experiment1_chn():
         res_word_df.to_csv(word_base_name + '_wordnorms.csv', header=['word', 'norm'], index=False)
 
         # Compute char norms for word_len = 1, 2, 3, 4
-        word_vectors_len1 = filter_by_length(word_vectors, len_to_keep=1)
-        res_len1 = compute_all_chars_norms(word_vectors_len1, char_vectors)
-        res_len1_df = pd.DataFrame(res_len1)
-        
-        
-
+        for i in [1,2,3,4]:
+            print(f'computing character norms for {group_folder}, len = {i}')
+            word_vectors_sub = filter_by_length(word_vectors, len_to_keep=i)
+            res_char = compute_all_chars_norms(word_vectors_sub, char_vectors)
+            res_char_df = pd.DataFrame(res_char)
+            res_char_df.to_csv(char_base_name + f'charnorms_len{i}.csv', index=False)
 
 
 def main():
