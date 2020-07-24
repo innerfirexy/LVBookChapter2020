@@ -125,9 +125,12 @@ def words_by_length(vectors: Dict[str, np.ndarray]) -> \
 def experiment1_chn():
     results_dir = './data/group_year_span/100years_cutoff1951'
 
-    ## cbow = 1, cwe_type = 1 (CWE)
+    # cbow = 1, cwe_type = 1 (CBOW + CWE)
     word_emb_file = 'wordvec_cbow1_size300_cwetype1.txt'
     char_emb_file = 'charvec_cbow1_size300_cwetype1.txt'
+    # cbow = 0, cwe_type = 1 (Skipgram + CWE)
+    # word_emb_file = 'wordvec_cbow0_size300_cwetype1.txt'
+    # char_emb_file = 'charvec_cbow0_size300_cwetype1.txt'
 
     for group_folder in glob.glob(os.path.join(results_dir, 'group*')):
         print(f'reading embeddings for {group_folder}')
@@ -151,7 +154,7 @@ def experiment1_chn():
             word_vectors_sub = filter_by_length(word_vectors, len_to_keep=i)
             res_char = compute_all_chars_norms(word_vectors_sub, char_vectors)
             res_char_df = pd.DataFrame(res_char)
-            res_char_df.to_csv(char_base_name + f'charnorms_len{i}.csv', index=False)
+            res_char_df.to_csv(char_base_name + f'_charnorms_len{i}.csv', index=False)
 
 
 def main():
