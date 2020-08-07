@@ -234,6 +234,43 @@ def group_year_span(span: int = 100, file_type: str = '.jieba'):
             subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 
 
+def sample_lines(nsamples = 30000):
+    """
+    Why:
+        When we run `find ./ -name "data_shuf.txt" | xargs wc -l`, here is the result:
+            98400 .//group7/data_shuf.txt
+            165578 .//group9/data_shuf.txt
+            90146 .//group8/data_shuf.txt
+            80422 .//group1/data_shuf.txt
+            76030 .//group6/data_shuf.txt
+            33127 .//group3/data_shuf.txt
+            54528 .//group4/data_shuf.txt
+            44276 .//group5/data_shuf.txt
+            58338 .//group2/data_shuf.txt
+            700845 total
+        This unbalanced data distribution could be the cause of the observed word/char norms patterns
+
+    Solution:
+        Sample 30000 lines from each data_shuf.txt, and use them to train.
+    """
+    data_dir = './data/group_year_span'
+    parent_folder = '100years_cutoff1951'
+    parent_dir = os.path.join(data_dir, parent_folder)
+
+    for i in range(1,10):
+        child_dir = os.path.join(parent_dir, f'group{i}')
+        in_file = os.path.join(child_dir, 'data_shuf.txt')
+        out_file = os.path.join(child_dir, 'data_shuf_sample.txt')
+        print(f'sampling {in_file} to {out_file}')
+
+        if platform.platform().startswith('Darwin'):
+            cmd = f'cat {in_file} | gshuf | head -n {nsamples} > {out_file}'
+            subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        elif platform.platform().startswith('Linux'):
+            cmd = f'cat {in_file} | shuf | head -n {nsamples} > {out_file}'
+            subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+
+
 def main():
     # convert_to_sentences()
     # remove_puncts()
@@ -241,7 +278,9 @@ def main():
     # merge_rows()
 
     # group_year_span(span=100)
-    group_year_span(span=100, file_type='.jieba.merged')
+    # group_year_span(span=100, file_type='.jieba.merged')
+    sample_lines(nsamples=30000)
+
 
 
 if __name__ == "__main__":

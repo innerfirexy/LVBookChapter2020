@@ -126,11 +126,12 @@ def experiment1_chn():
     results_dir = './data/group_year_span/100years_cutoff1951'
 
     # cbow = 1, cwe_type = 1 (CBOW + CWE)
-    word_emb_file = 'wordvec_cbow1_size300_cwetype1.txt'
-    char_emb_file = 'charvec_cbow1_size300_cwetype1.txt'
+    # word_emb_file = 'wordvec_cbow1_size300_cwetype1_data_shuf_sample.txt'
+    # char_emb_file = 'charvec_cbow1_size300_cwetype1_data_shuf_sample.txt'
+
     # cbow = 0, cwe_type = 1 (Skipgram + CWE)
-    # word_emb_file = 'wordvec_cbow0_size300_cwetype1.txt'
-    # char_emb_file = 'charvec_cbow0_size300_cwetype1.txt'
+    word_emb_file = 'wordvec_cbow0_size300_cwetype1_data_shuf_sample.txt'
+    char_emb_file = 'charvec_cbow0_size300_cwetype1_data_shuf_sample.txt'
 
     for group_folder in glob.glob(os.path.join(results_dir, 'group*')):
         print(f'reading embeddings for {group_folder}')

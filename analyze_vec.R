@@ -4,17 +4,19 @@ require(stringr)
 require(dplyr)
 
 
-dt.cc = fread("wikisource_chn_cc_year.csv")
-
-p = ggplot(dt.cc[year<=1875], aes(x=year, y=charCount)) + geom_jitter()
-ggsave("cc_year.pdf", plot=p, width=8, height = 4)
+# dt.cc = fread("wikisource_chn_cc_year.csv")
+# p = ggplot(dt.cc[year<=1875], aes(x=year, y=charCount)) + geom_jitter()
+# ggsave("cc_year.pdf", plot=p, width=8, height = 4)
 
 
 ###
 # Read word vector norms
 rootFolder = "./data/group_year_span/100years_cutoff1951"
 groups = Sys.glob(file.path(rootFolder,"group*"))
-hyperParams = "cbow1_size300_cwetype1"
+# hyperParams = "cbow1_size300_cwetype1"
+# hyperParams = "cbow1_size300_cwetype1_data_shuf_sample"
+hyperParams = "cbow0_size300_cwetype1_data_shuf_sample"
+
 
 dt.wnorms = data.table()
 for (grp in groups) {
@@ -74,60 +76,12 @@ dt.cnorms.len4 = rename(dt.cnorms.len4, word = V1, ch1norm = V2, ch2norm = V3, c
 ###
 # print
 dt.cnorms.len1
-#        word   ch1norm yearGroup wordLen
-#     1:   之 28.129229    group1       1
-#     2:   於 11.115711    group1       1
-#     3:   而 16.235857    group1       1
-#     4:   也  8.862605    group1       1
-#     5:   曰 13.906273    group1       1
-#    ---                                 
-# 41681:   麋  2.734783    group9       1
-# 41682:   醺  1.279642    group9       1
-# 41683:   邏  2.876110    group9       1
-# 41684:   澈  3.893485    group9       1
-# 41685:   盏  2.256299    group9       1
 
 dt.cnorms.len2
-#         word  ch1norm  ch2norm yearGroup wordLen
-#      1: 天下 23.96513 21.61901    group1       2
-#      2: 不可 26.82893 22.53408    group1       2
-#      3: 陛下 17.01623 21.61901    group1       2
-#      4: 不能 26.82893 14.28710    group1       2
-#      5: 朝廷 15.75091 10.10425    group1       2
-#     ---                                         
-# 204001: 愛君 17.50762 20.02632    group9       2
-# 204002: 生机 27.26549 18.91319    group9       2
-# 204003: 款式 22.72212 16.66585    group9       2
-# 204004: 一源 32.20609 16.20178    group9       2
-# 204005: 權行 34.42167 26.81774    group9       2
 
 dt.cnorms.len3
-#          word  ch1norm  ch2norm  ch3norm yearGroup wordLen
-#     1: 会计师 15.99137 39.22816 12.60471    group1       3
-#     2: 樞密院 22.75516 19.16593 24.49895    group1       3
-#     3: 士大夫 25.67350 13.60612 18.40463    group1       3
-#     4: 王安石 21.71546 16.20210 14.84477    group1       3
-#     5: 軍節度 24.94672 16.82806 14.45265    group1       3
-#    ---                                                    
-# 17257: 礦產地 13.88551 25.06489 33.67128    group9       3
-# 17258: 中國全 28.47364 42.91333 21.68737    group9       3
-# 17259: 財產及 13.94514 25.06489 24.43055    group9       3
-# 17260: 無所見 27.01165 26.82688 24.19416    group9       3
-# 17261: 李春發 21.22027 16.42271 23.56733    group9       3
 
 dt.cnorms.len4
-#           word   ch1norm   ch2norm   ch3norm   ch4norm yearGroup wordLen
-#    1: 审计工作 23.428506 39.228156 11.753285 15.614833    group1       4
-#    2: 御史中丞 22.344590 19.690056 22.197392 17.340880    group1       4
-#    3: 太皇太后 24.517013 23.607018 24.517013 16.962977    group1       4
-#    4: 财务报表 13.370693 29.131133 24.108787 10.614163    group1       4
-#    5: 审计报告 23.428506 39.228156 24.108787  8.898856    group1       4
-#   ---                                                                   
-# 3558: 萬壽聖節 28.604260  6.221004 17.741363 13.270659    group9       4
-# 3559: 歐美學者 16.936803 17.120091 37.948945 34.235868    group9       4
-# 3560: 夙兴夜寐  3.377830  8.413206 25.092624 10.818650    group9       4
-# 3561: 公平交易 24.483013 17.402820 21.561293 16.307971    group9       4
-# 3562: 崇壽禪院  8.975205  6.221004  9.443777 31.548748    group9       4
 
 
 ###
@@ -136,6 +90,100 @@ dt.cnorms.len1[, meanCharNorm := ch1norm][]
 dt.cnorms.len2[, meanCharNorm := (ch1norm + ch2norm) / 2][]
 dt.cnorms.len3[, meanCharNorm := (ch1norm + ch2norm + ch3norm) / 3][]
 dt.cnorms.len4[, meanCharNorm := (ch1norm + ch2norm + ch3norm + ch4norm) / 4][]
+
+
+###
+# combine `meanCharNorm` column with the `norm` column in dt.wnorms
+combineNormCols = function(dt.cnorms, dt.wnorms) {
+    setkey(dt.cnorms, word, yearGroup)
+    setkey(dt.wnorms, word, yearGroup)
+    dt.combined = dt.cnorms[dt.wnorms, nomatch = 0]
+    setnames(dt.combined, old = "norm", new = "wordNorm")
+    dt.combined
+}
+
+dt.wcnorms.len1 = combineNormCols(dt.cnorms.len1, dt.wnorms)
+dt.wcnorms.len2 = combineNormCols(dt.cnorms.len2, dt.wnorms)
+dt.wcnorms.len3 = combineNormCols(dt.cnorms.len3, dt.wnorms)
+dt.wcnorms.len4 = combineNormCols(dt.cnorms.len4, dt.wnorms)
+
+# Add norm ration column
+# charRatio = meanCharNorm / (meanCharNorm + wordNorm)
+dt.wcnorms.len1[, charRatio := meanCharNorm / (meanCharNorm + wordNorm)]
+dt.wcnorms.len2[, charRatio := meanCharNorm / (meanCharNorm + wordNorm)]
+dt.wcnorms.len3[, charRatio := meanCharNorm / (meanCharNorm + wordNorm)]
+dt.wcnorms.len4[, charRatio := meanCharNorm / (meanCharNorm + wordNorm)]
+
+
+###
+# Plot
+p.len1 = ggplot(dt.wcnorms.len1, aes(x = yearGroup, y = charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+    theme_bw()
+
+p.len2 = ggplot(dt.wcnorms.len2, aes(x = yearGroup, y = charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+    theme_bw()
+
+p.len3 = ggplot(dt.wcnorms.len3, aes(x = yearGroup, y = charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+    theme_bw()
+
+p.len4 = ggplot(dt.wcnorms.len4, aes(x = yearGroup, y = charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+    theme_bw()
+
+
+###
+# Find the common vocabulary between groups
+commonVocab = function(dt.cnorms) {
+    vocab = c()
+    for (i in 1:9) {
+        grp = stringr::str_interp("group${i}")
+        subvocab = unique(dt.cnorms[yearGroup == grp]$word)
+        if (i == 1) {
+            vocab = subvocab
+        } else {
+            vocab = intersect(vocab, subvocab)
+        }
+    }
+    vocab
+}
+
+cv.len1 = commonVocab(dt.cnorms.len1)
+length(cv.len1) # 
+length(unique(dt.cnorms.len1$word)) # 
+
+cv.len2 = commonVocab(dt.cnorms.len2)
+length(cv.len2) # 
+length(unique(dt.cnorms.len2$word)) # 
+
+cv.len3 = commonVocab(dt.cnorms.len3)
+length(cv.len3) # 
+length(unique(dt.cnorms.len3$word)) # 
+
+cv.len4 = commonVocab(dt.cnorms.len4)
+length(cv.len4) # 
+length(unique(dt.cnorms.len4$word)) # 
+
+
+###
+# Plot with common vocabulary only
+p.len1.cv = ggplot(dt.wcnorms.len1[word %in% cv.len1], aes(x = yearGroup, y = charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+    theme_bw()
+
+p.len2.cv = ggplot(dt.wcnorms.len2[word %in% cv.len2], aes(x = yearGroup, y = charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+    theme_bw()
+
+p.len3.cv = ggplot(dt.wcnorms.len3[word %in% cv.len3], aes(x = yearGroup, y = charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+    theme_bw()
+
+p.len4.cv = ggplot(dt.wcnorms.len4[word %in% cv.len4], aes(x = yearGroup, y = charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+    theme_bw()
 
 
 ###
