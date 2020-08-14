@@ -38,6 +38,9 @@ d.combm.clean = melt(d.comb.clean, id.vars = "year", variable.name = "Statistics
 
 
 ### Plot
+require(viridis)
+require(hrbrthemes)
+
 p.scatter = ggplot(d.combm.clean[year<=1950], aes(x=year, y=value)) + 
     geom_point(aes(color=Statistics, shape=Statistics)) + 
     geom_smooth(aes(color=Statistics, linetype=Statistics))
@@ -50,12 +53,17 @@ p.smooth = ggplot(d.combm.clean[year<=1950], aes(x=year, y=value)) +
     geom_smooth(aes(color=Statistics, linetype=Statistics))
 
 
-p.col = ggplot(d.combm.clean[year %in% seq(1040, 1950, 10)], aes(x=year, y=value)) + 
+p.col <- ggplot(d.combm.clean[year %in% seq(1040, 1950, 10)], aes(x=year, y=value)) + 
     geom_col(aes(fill=Statistics), position="stack") +
     theme_bw()
 
-require(ggpattern)
-p.col.pattern = ggplot(d.combm.clean[year %in% seq(1040, 1950, 10)], aes(x=year, y=value)) + 
-    geom_col_pattern(pattern = "magick", aes(pattern_fill=Statistics)) + 
-    theme_bw()
-# Does not work
+p.area <- ggplot(d.combm.clean[year %in% seq(1040, 1950, 10)], aes(x=year, y=value)) + 
+    geom_area(alpha=0.6 , size=.5, color="white", aes(fill=Statistics), position = "stack") +
+    scale_fill_viridis(discrete = T, labels = c("Word count", "Character count", "Vocab size")) +
+    labs(x = "Publish year", y = "Value") +
+    theme(legend.position = c(0.1,0.82)) 
+ggsave('word_char_vocab_vs_year.pdf', plot=p.area, width=8, height = 4)
+
+# p.col.pattern = ggplot(d.combm.clean[year %in% seq(1040, 1950, 10)], aes(x=year, y=value)) + 
+#     geom_col_pattern(pattern = "magick", aes(pattern_fill=Statistics)) + 
+#     theme_bw()
