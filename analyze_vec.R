@@ -2,6 +2,7 @@ require(data.table)
 require(ggplot2)
 require(stringr)
 require(dplyr)
+require(patchwork)
 
 
 # dt.cc = fread("wikisource_chn_cc_year.csv")
@@ -166,24 +167,83 @@ cv.len4 = commonVocab(dt.cnorms.len4)
 length(cv.len4) # 
 length(unique(dt.cnorms.len4$word)) # 
 
+cv.allLens <- c(cv.len1, cv.len2, cv.len3, cv.len4)
+
+dt.wcnorms.len1$yearGroupInt <- as.integer(str_sub(dt.wcnorms.len1$yearGroup, start=6))
+dt.wcnorms.len2$yearGroupInt <- as.integer(str_sub(dt.wcnorms.len2$yearGroup, start=6))
+dt.wcnorms.len3$yearGroupInt <- as.integer(str_sub(dt.wcnorms.len3$yearGroup, start=6))
+dt.wcnorms.len4$yearGroupInt <- as.integer(str_sub(dt.wcnorms.len4$yearGroup, start=6))
+
+
+gg_color_hue <- function(n) {
+    hues = seq(15, 375, length = n + 1)
+    hcl(h = hues, l = 65, c = 100)[1:n]
+}
+FOUR_COLORS <- gg_color_hue(4)
+
 
 ###
 # Plot with common vocabulary only
-p.len1.cv = ggplot(dt.wcnorms.len1[word %in% cv.len1], aes(x = yearGroup, y = charRatio)) + 
-    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+p.len1.cv = ggplot(dt.wcnorms.len1[word %in% cv.len1], aes(x = yearGroupInt, y = 1 - charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange", color=FOUR_COLORS[1]) + 
+    geom_smooth(method = 'lm', linetype='dotted', color=FOUR_COLORS[1]) + 
+    scale_x_discrete(limits=1:9) + 
+    labs(y = "Semantic weight Omega", x = "Year group", title = "Word length = 1") + 
     theme_bw()
+ggsave('Omega_yeargroup_len1_commonVocab.pdf', plot=p.len1.cv, width=5, height = 4)
 
-p.len2.cv = ggplot(dt.wcnorms.len2[word %in% cv.len2], aes(x = yearGroup, y = charRatio)) + 
-    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+p.len2.cv = ggplot(dt.wcnorms.len2[word %in% cv.len2], aes(x = yearGroupInt, y = 1 - charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange", color=FOUR_COLORS[2]) + 
+    geom_smooth(method = 'lm', linetype='dotted', color=FOUR_COLORS[2]) + 
+    scale_x_discrete(limits=1:9) + 
+    labs(y = "Semantic weight Omega", x = "Year group", title = "Word length = 2") + 
     theme_bw()
+ggsave('Omega_yeargroup_len2_commonVocab.pdf', plot=p.len2.cv, width=5, height = 4)
 
-p.len3.cv = ggplot(dt.wcnorms.len3[word %in% cv.len3], aes(x = yearGroup, y = charRatio)) + 
-    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+p.len3.cv = ggplot(dt.wcnorms.len3[word %in% cv.len3], aes(x = yearGroupInt, y = 1 - charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange", color=FOUR_COLORS[3]) + 
+    geom_smooth(method = 'lm', linetype='dotted', color=FOUR_COLORS[3]) + 
+    scale_x_discrete(limits=1:9) + 
+    labs(y = "Semantic weight Omega", x = "Year group", title = "Word length = 3") + 
     theme_bw()
+ggsave('Omega_yeargroup_len3_commonVocab.pdf', plot=p.len3.cv, width=5, height = 4)
 
-p.len4.cv = ggplot(dt.wcnorms.len4[word %in% cv.len4], aes(x = yearGroup, y = charRatio)) + 
-    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange") + 
+p.len4.cv = ggplot(dt.wcnorms.len4[word %in% cv.len4], aes(x = yearGroupInt, y = 1 - charRatio)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange", color=FOUR_COLORS[4]) + 
+    geom_smooth(method = 'lm', linetype='dotted', color=FOUR_COLORS[4]) + 
+    scale_x_discrete(limits=1:9) + 
+    labs(y = "Semantic weight Omega", x = "Year group", title = "Word length = 4") + 
     theme_bw()
+ggsave('Omega_yeargroup_len4_commonVocab.pdf', plot=p.len4.cv, width=5, height = 4)
+
+
+p.allLens.cv <- p.len1.cv | p.len2.cv | p.len3.cv | p.len4.cv
+ggsave("Omega_yeargroup_alllens_commonVocab.pdf", plot=p.allLens.cv, width=16, height = 4)
+
+p.allLens.cv <- (p.len1.cv | p.len2.cv) / (p.len3.cv | p.len4.cv)
+ggsave("Omega_yeargroup_alllens_commonVocab_2by2.pdf", plot=p.allLens.cv, width=8, height = 8)
+
+
+# combine all lens
+dt.wcnorms.allLens <- rbindlist(list(
+    dt.wcnorms.len1[, .(word, yearGroup, wordLen, charRatio)],
+    dt.wcnorms.len2[, .(word, yearGroup, wordLen, charRatio)],
+    dt.wcnorms.len3[, .(word, yearGroup, wordLen, charRatio)],
+    dt.wcnorms.len4[, .(word, yearGroup, wordLen, charRatio)]
+))
+dt.wcnorms.allLens[, Omega := 1 - charRatio]
+
+p.allLens.cv <- ggplot(dt.wcnorms.allLens[word %in% cv.allLens], aes(x = yearGroup, y = Omega)) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange", aes(color=as.factor(wordLen))) + 
+    theme_bw()
+ggsave("Omega_yeargroup_alllens_commonVocab.pdf", plot=p.allLens.cv, width=6, height=4)
+# 区分不明显
+
+p.allLens.cv <- ggplot(dt.wcnorms.allLens[word %in% cv.allLens], aes(x = yearGroup, y = Omega)) + 
+    facet_grid(~ wordLen, scales = "free_y", shrink = FALSE) + 
+    stat_summary(fun = mean, fun.data = mean_cl_boot, geom = "pointrange", aes(color=as.factor(wordLen))) + 
+    theme_bw()
+ggsave("Omega_yeargroup_alllens_commonVocab.pdf", plot=p.allLens.cv, width=10, height=3)
 
 
 ###
