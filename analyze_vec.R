@@ -15,8 +15,8 @@ require(patchwork)
 rootFolder = "./data/group_year_span/100years_cutoff1951"
 groups = Sys.glob(file.path(rootFolder,"group*"))
 # hyperParams = "cbow1_size300_cwetype1"
-# hyperParams = "cbow1_size300_cwetype1_data_shuf_sample"
-hyperParams = "cbow0_size300_cwetype1_data_shuf_sample"
+hyperParams = "cbow1_size300_cwetype1_data_shuf_sample"
+# hyperParams = "cbow0_size300_cwetype1_data_shuf_sample"
 
 
 dt.wnorms = data.table()
